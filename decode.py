@@ -51,11 +51,11 @@ morse_code = {
     "=": "-...-",
     "+": ".-.-.",
     "_": "..--.-",
-    "\"": ".-..-.",
+    '"': ".-..-.",
     "$": "...-..-",
     "@": ".--.-.",
     "!": "-.-.--",
-    " ": "/"
+    " ": "/",
 }
 
 # Decode the morse code to text
@@ -63,4 +63,40 @@ morse_code = {
 with wave.open("morse.wav", "rb") as f:
     frames = f.readframes(f.getnframes())
     # what is frames?
-    
+
+    values = [bool(f - 128) for f in frames]
+
+    signals = []
+    current = values[0]
+    count = 0
+
+    for v in values:
+        if v == current:
+            count += 1
+        else:
+            if count > 5:
+                signals.append((current, count))
+            count = 0
+            current = v
+
+    print(signals)
+
+    def get_char(on, duration):
+        if duration > 1600:
+            return " / "
+        elif duration > 500:
+            if on:
+                return "-"
+            else:
+                return " "
+        elif on:
+            return "."
+
+    morse = [get_char(*s) for s in signals]
+
+
+    morse_characters = "".join(morse).split()
+
+    reversed_dict = {v: k for k, v in morse_code.items()}
+
+    print(''.join(reversed_dict.get(char) for char in morse_characters))
